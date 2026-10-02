@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
 .SYNOPSIS
   把破甲指令包按原有目录结构推送到 GitHub 仓库。
