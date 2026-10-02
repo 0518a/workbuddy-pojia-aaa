@@ -7,7 +7,9 @@ import re
 import sys
 import time
 
-WD = r"C:\Users\uup\.workbuddy"
+WD = os.environ.get("WORKBUDDY_CONFIG_DIR") or os.path.join(
+    os.path.expanduser("~"),
+    os.environ.get("WORKBUDDY_DATA_FOLDER_NAME", "").strip() or ".workbuddy")
 LIMIT = int(sys.argv[1]) if len(sys.argv) > 1 else 6
 
 files = glob.glob(os.path.join(WD, "traces", "*", "trace_*.json"))
@@ -40,7 +42,7 @@ for f in files[:LIMIT]:
         last = msgs[-1].get("content") or ""
     except Exception:
         last = raw_input
-    q = last.rfind("<user_query>")
+    q = last.rfind("<user_query>") if isinstance(last, str) else -1
     if q < 0:
         q = raw_input.rfind("<user_query>")
     print("   --- 提问 ---")
@@ -49,7 +51,7 @@ for f in files[:LIMIT]:
     print("   --- 回复 ---")
     try:
         j = json.loads(out)
-        txt = j[0]["choices"][0]["message"]["content"]
+        txt = j[0]["choices"][0]["message"].get("content") or ""
     except Exception:
         txt = out.replace("\\n", "\n")
     print("   " + txt[:300].replace("\n", "\n   "))

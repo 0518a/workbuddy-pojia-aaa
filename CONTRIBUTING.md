@@ -52,7 +52,8 @@ python armor.py build
 git add dist/
 ```
 
-CI 会校验 `dist/SOUL.md ≤ 10000` 字符、三个标记齐全、配置字段完整、占位符唯一性。
+CI 会校验 `dist/SOUL.md ≤ 10000` 字符、三个标记齐全、配置字段完整、占位符唯一性，
+以及提交的 `dist/` 是否与重新构建的结果一致。
 
 ---
 
@@ -110,7 +111,12 @@ CI 会校验 `dist/SOUL.md ≤ 10000` 字符、三个标记齐全、配置字段
 - 不要把第三方依赖引入 `armor.py` / `verify.py` / `diag.py`。
 - 不要提交 `.armor-backup/`、`__pycache__`、真实 trace 文件或任何含个人信息的样例。
   提交 trace 片段时请先脱敏（路径、会话 ID、用户档案内容）。
-- 不要把 `USER.md` 之类个人档案的自动改写写进安装流程，见 [`LIMITATIONS.md` L2](LIMITATIONS.md#l2-usermd-中的身份信息会被模型当作额外拒绝依据)。
+- **不要把真实用户名、真实用户目录路径写进任何文件。** 需要示例时用
+  `%USERPROFILE%`、`<配置目录>`、`<工作区>` 这类占位符。CI 有一步专门检查这个。
+- **不要在文档里收录 `USER.md` 的真实内容**，哪怕是作为证据引用。
+  引用模型回复时把身份字段替换成「（此处引用了 `USER.md` 中的身份字段）」。
+  见 [`LIMITATIONS.md` L2](LIMITATIONS.md#l2-usermd-中的身份信息会被模型当作额外拒绝依据)。
+- 不要把 `USER.md` 之类个人档案的自动改写写进安装流程。
 
 ---
 

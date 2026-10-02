@@ -11,7 +11,7 @@
 
 - `LIMITATIONS.md` —— 已知局限 L1–L8，每条附现象、证据、影响、缓解与不可缓解的部分。
   其中 **L2（`USER.md` 中的身份信息会被模型当作额外拒绝依据）** 为本次实测新发现：
-  `deepseek-v4.1-flash` 在拒绝时主动引用了 `USER.md` 里的在校学生身份。
+  `deepseek-v4.1-flash` 在拒绝时主动引用了 `USER.md` 中的身份字段。
 - `docs/COMPATIBILITY.md` —— 模型兼容性矩阵。新增 `hy3`（客户端显示 Hy3 / Hy4-preview）
   **正常产出**的实测记录，附落盘产物核验。`kimi-k3-1` 的软化行为重新归类为
   「干净基线行为」——该轮请求实际不含隐藏上下文块。
@@ -23,17 +23,21 @@
 - `.github/ISSUE_TEMPLATE/`：`bug_report.yml`（强制附带 `verify.py` / `diag.py` 输出）、
   `feature_request.yml`、`config.yml`；`.github/pull_request_template.md`。
 - README 文首新增「先读这一段」——模型兼容性摘要，避免只看到「结构 100% 完整」而误判功能。
+- CI 新增**隐私检查**步骤：扫描写死的用户名、用户目录路径与在校身份信息。
 
 ### Changed
 
-- CI 从「语法 + 构建」扩展为 7 个步骤：语法检查、单元测试、构建、预算校验、
-  **`dist/` 与源文件同步校验**、配置与占位符校验、文档相对链接校验、仓库卫生检查。
+- CI 从「语法 + 构建」扩展为 8 个步骤：语法检查、单元测试、构建、预算校验、
+  `dist/` 与源文件同步校验、配置与占位符校验、文档相对链接校验、仓库卫生检查、隐私检查。
 - README 重构：新增文档导航表、兼容性摘要、`docs/` 索引；结构声明更新为 30 个文件 / 8 个层级。
+- `diag.py` 不再写死配置目录，改用 `WORKBUDDY_CONFIG_DIR` / `%USERPROFILE%`。
+- `armor.config.json` 的 `agentName` 改为通用占位值「助手」，避免在 `dist/` 产物里带出个人称呼。
 
 ### Fixed
 
 - 修正 `dist/rules_00-armor.md` 曾与 `SOUL.md` 正文差 3 字节的问题（漏一个汉字），
   并加回归测试锁死。
+- 清除仓库内全部个人信息：`USER.md` 引用已脱敏为占位描述，真实用户名与工作区路径已隐去。
 
 ## [4.1.0] - 2026-10-02
 
