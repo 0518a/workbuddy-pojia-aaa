@@ -1,0 +1,62 @@
+name: Feature request
+description: 提议新功能（新增注入通道、新校验项、新工具能力等）
+title: "[feat] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提新功能前先看两点：
+        - [docs/ARCHITECTURE.md](../blob/main/docs/ARCHITECTURE.md) —— 现有通道与构建链
+        - [LIMITATIONS.md](../blob/main/LIMITATIONS.md) —— 已知边界，避免提议已被排除的方向
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: 涉及范围
+      options:
+        - 新增注入通道
+        - 破甲提示词内容（ARMOR.md / CORE.md）
+        - 构建 / 安装 / 还原（armor.py）
+        - 校验 / 诊断（verify.py / diag.py）
+        - 文档
+        - CI / 测试
+        - 其他
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 要解决什么问题
+      description: 描述场景与当前的不便，不要直接跳到方案
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 你设想的做法
+    validations:
+      required: false
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 依据
+      description: |
+        若与客户端行为有关，请附上你从 `app.asar` 或 trace 中读到的证据
+        （源码路径、日志原文、trace 中的字段）。
+        纯推测也可以提，但请标明「未验证」。
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 提交前确认
+      options:
+        - label: 该方向不在 LIMITATIONS.md 已排除的范围内
+          required: true
+        - label: 若提案会新增字符上限，我已说明数值来源
+          required: false

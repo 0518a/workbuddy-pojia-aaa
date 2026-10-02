@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 先读：已知局限
+    url: https://github.com/0518a/workbuddy-pojia-aaa/blob/main/LIMITATIONS.md
+    about: 「破甲不生效」多数属于已知局限 L1 / L2 / L4，不是 bug。
+  - name: 先读：模型兼容性矩阵
+    url: https://github.com/0518a/workbuddy-pojia-aaa/blob/main/docs/COMPATIBILITY.md
+    about: 各模型在破甲全量注入下的实测结果，附复核方法。
+  - name: 安全漏洞
+    url: https://github.com/0518a/workbuddy-pojia-aaa/security
+    about: 请勿用公开 issue 报告安全问题，走 Security 标签。

@@ -1,0 +1,91 @@
+name: Bug report
+description: 报告一个问题（破甲不生效、工具报错、产物异常等）
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。**请先读 [LIMITATIONS.md](../blob/main/LIMITATIONS.md)。**
+        多数「不生效」属于已知局限 L1（模型硬拦截）与 L4（会话首条消息之后上下文块消失），
+        不是 bug。
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: 问题类别
+      options:
+        - 注入失效（verify.py 线上层一直「待复测」）
+        - 模型拒绝（注入到位但模型不照做）
+        - 工具报错（armor.py / verify.py / diag.py 抛异常）
+        - 产物不一致（dist/ 与文档描述不符）
+        - 安装后客户端异常
+        - 其他
+    validations:
+      required: true
+
+  - type: input
+    id: client
+    attributes:
+      label: WorkBuddy 版本
+      description: 取自 `<配置目录>\last-launch.json` 的 version / build
+      placeholder: "5.6.2 / 37a65c0b33b8e394904eb49e6c218c4cc0601649"
+    validations:
+      required: true
+
+  - type: input
+    id: model
+    attributes:
+      label: 模型 ID
+      description: 客户端里选的模型，或 `diag.py` 输出里的 model 字段
+      placeholder: "deepseek-v4.1-flash"
+    validations:
+      required: false
+
+  - type: textarea
+    id: verify
+    attributes:
+      label: verify.py 输出
+      description: 完整粘贴（含文件层与线上层两部分）
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: diag
+    attributes:
+      label: diag.py 输出
+      description: "`python diag.py 3` 的输出。**请先脱敏**：删掉个人路径、会话 ID、用户档案内容。"
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望行为 vs 实际行为
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 新开会话
+        2. 第一条消息发：……
+        3. 观察：……
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 提交前确认
+      options:
+        - label: 我已阅读 LIMITATIONS.md，确认这不是已知局限
+          required: true
+        - label: 我已确认 `python verify.py` 的线上层结果（用于区分「注入失效」与「模型拒绝」）
+          required: true
+        - label: 我的输出已脱敏，不含个人信息与真实 trace 原文
+          required: true
