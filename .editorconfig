@@ -1,0 +1,24 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{md,markdown}]
+trim_trailing_whitespace = false
+
+[*.{json,yml,yaml}]
+indent_size = 2
+
+[*.ps1]
+# 注意：Windows PowerShell 5.1 读取无 BOM 的 .ps1 会按 ANSI(GBK) 解码，
+# 中文字符串会裂成乱码并报 Unexpected token。
+# 本仓库的 .ps1 一律保存为「UTF-8 with BOM」，请勿去掉 BOM。
+charset = utf-8-bom
+
+[*.{py,pyi}]
+max_line_length = 100
