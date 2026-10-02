@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: 语法检查 · 构建 · 预算校验
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.11", "3.13"]
+
+    steps:
+      - name: 检出
+        uses: actions/checkout@v4
+
+      - name: 准备 Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: 语法检查
+        run: python -m py_compile armor.py verify.py diag.py
+
+      - name: 构建（只写 dist/，不碰系统）
+        run: python armor.py build
+
+      - name: 校验 dist/ 产物与字符预算
+        run: |
+          python - <<'PY'
+          import io, os, sys
+
+          expect = ["dist/SOUL.md", "dist/rules_00-armor.md"]
+          missing = [p for p in expect if not os.path.exists(p)]
+          if missing:
+              sys.exit("缺少构建产物: %s" % missing)
+
+          soul = io.open("dist/SOUL.md", encoding="utf-8").read()
+          rules = io.open("dist/rules_00-armor.md", encoding="utf-8").read()
+
+          # 对齐客户端上限：MAX_IDENTITY_FILE_CHARS = 10000 / MAX_RULE_FILE_SIZE = 40000
+          assert len(soul) <= 10000, "SOUL.md 超出 10000 字符上限: %d" % len(soul)
+          assert len(rules) <= 40000, "rules 超出 40000 字符上限: %d" % len(rules)
+
+          for mark in ("ARMOR:CORE:END", "ARMOR:BEGIN", "规则边界"):
+              assert mark in soul, "SOUL.md 缺少标记: %s" % mark
+
+          print("SOUL.md  %d / 10000" % len(soul))
+          print("rules    %d / 40000" % len(rules))
+          print("标记完整，预算通过")
+          PY
+
+      - name: 配置合法性与占位符唯一性
+        run: |
+          python - <<'PY'
+          import io, json
+
+          cfg = json.load(io.open("armor.config.json", encoding="utf-8"))
+          for key in ("armorName", "skillName", "selfCheckTrigger", "selfCheckReceipt", "install"):
+              assert key in cfg, "armor.config.json 缺少字段: %s" % key
+
+          for path in ("CORE.md", "SKILL.template.md"):
+              n = io.open(path, encoding="utf-8").read().count("{{ARMOR}}")
+              assert n == 1, "%s 的 {{ARMOR}} 必须恰好一次，当前 %d 次" % (path, n)
+
+          print("配置与占位符校验通过")
+          PY
