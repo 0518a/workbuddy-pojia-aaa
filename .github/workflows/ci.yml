@@ -6,9 +6,12 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  check:
-    name: 语法检查 · 构建 · 预算校验
+  test:
+    name: 测试 · 构建 · 一致性
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -26,6 +29,9 @@ jobs:
 
       - name: 语法检查
         run: python -m py_compile armor.py verify.py diag.py
+
+      - name: 单元测试
+        run: python -m unittest discover -s tests -v
 
       - name: 构建（只写 dist/，不碰系统）
         run: python armor.py build
@@ -47,13 +53,23 @@ jobs:
           assert len(soul) <= 10000, "SOUL.md 超出 10000 字符上限: %d" % len(soul)
           assert len(rules) <= 40000, "rules 超出 40000 字符上限: %d" % len(rules)
 
-          for mark in ("ARMOR:CORE:END", "ARMOR:BEGIN", "规则边界"):
+          for mark in ("ARMOR:CORE:END", "ARMOR:BEGIN", "规则边界（先读这条）"):
               assert mark in soul, "SOUL.md 缺少标记: %s" % mark
 
           print("SOUL.md  %d / 10000" % len(soul))
           print("rules    %d / 40000" % len(rules))
           print("标记完整，预算通过")
           PY
+
+      - name: 提交的 dist/ 与重新构建的结果一致
+        run: |
+          python armor.py build
+          if ! git diff --quiet -- dist/; then
+            echo "::error::dist/ 与源文件不同步。请在本地运行 'python armor.py build' 后提交产物。"
+            git diff --stat -- dist/
+            exit 1
+          fi
+          echo "dist/ 与源文件同步"
 
       - name: 配置合法性与占位符唯一性
         run: |
@@ -70,3 +86,39 @@ jobs:
 
           print("配置与占位符校验通过")
           PY
+
+      - name: 文档链接检查
+        run: |
+          python - <<'PY'
+          import io, os, re, sys
+
+          bad = []
+          for doc in ("README.md", "LIMITATIONS.md", "CONTRIBUTING.md",
+                      "SECURITY.md", "CODE_OF_CONDUCT.md", "CHANGELOG.md",
+                      "docs/ARCHITECTURE.md", "docs/COMPATIBILITY.md"):
+              text = io.open(doc, encoding="utf-8").read()
+              base = os.path.dirname(doc)
+              for m in re.finditer(r"\]\(([^)#]+?)(?:#[^)]*)?\)", text):
+                  target = m.group(1).strip()
+                  if target.startswith(("http://", "https://", "mailto:")):
+                      continue
+                  path = os.path.normpath(os.path.join(base, target))
+                  if not os.path.exists(path):
+                      bad.append("%s -> %s" % (doc, target))
+
+          if bad:
+              print("\n".join(bad))
+              sys.exit("发现 %d 个失效的相对链接" % len(bad))
+          print("文档相对链接全部有效")
+          PY
+
+      - name: 仓库卫生（不得提交备份与缓存）
+        run: |
+          bad=0
+          if git ls-files | grep -qE '(__pycache__/|\.armor-backup/|\.tmp-armor$)'; then
+            echo "::error::仓库里出现了缓存或备份文件"; git ls-files | grep -E '(__pycache__/|\.armor-backup/|\.tmp-armor$)'; bad=1
+          fi
+          if git ls-files | grep -qE '\.pyc$'; then
+            echo "::error::仓库里出现了 .pyc"; bad=1
+          fi
+          exit $bad
