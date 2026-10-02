@@ -48,11 +48,11 @@ python -m py_compile armor.py verify.py diag.py
 如果改动了 `CORE.md` / `ARMOR.md`，同时提交重新生成的 `dist/`：
 
 ```bash
+python armor.py build
 git add dist/
 ```
 
-CI 会校验 `dist/SOUL.md ≤ 10000` 字符、三个标记齐全、配置字段完整、占位符唯一性、
-以及提交的 `dist/` 是否与重新构建的结果一致。
+CI 会校验 `dist/SOUL.md ≤ 10000` 字符、三个标记齐全、配置字段完整、占位符唯一性。
 
 ---
 
